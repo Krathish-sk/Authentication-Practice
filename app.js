@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import mongoose from "mongoose";
-import md5 from "md5";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 const port = 3000;
@@ -14,6 +14,7 @@ app.use(express.static("public"));
 app.set("view engine", "ejs");
 
 const secret = process.env.SECRET;
+const saltRound = 10;
 
 // Connect to data base
 const connectDB = async () => {
@@ -48,11 +49,14 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
+// Login POST
 app.post("/login", async (req, res) => {
   const { username: email, password } = req.body;
   try {
     const user = await User.findOne({ email });
-    if (md5(password) === user.password) {
+    const isValid = await bcrypt.compare(password, user.password);
+    console.log(isValid);
+    if (isValid) {
       res.render("secrets");
     } else res.redirect("/");
   } catch (error) {
@@ -60,9 +64,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Register POST
 app.post("/register", async (req, res) => {
   const { username: email, password } = req.body;
-  await User.create({ email, password: md5(password) });
+  bcrypt.hash(password, saltRound, async function (err, hash) {
+    await User.create({ email, password: hash });
+  });
   res.render("secrets");
 });
 
