@@ -1,16 +1,19 @@
 //jshint esversion:6
 import express from "express";
+import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import mongoose from "mongoose";
 import encrypt from "mongoose-encryption";
 
+dotenv.config();
 const port = 3000;
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
-const secret = "ThisIsMySecret";
+
+const secret = process.env.SECRET;
 
 // Connect to data base
 const connectDB = async () => {
