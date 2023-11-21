@@ -3,12 +3,14 @@ import express from "express";
 import bodyParser from "body-parser";
 import ejs from "ejs";
 import mongoose from "mongoose";
+import encrypt from "mongoose-encryption";
 
 const port = 3000;
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
+const secret = "ThisIsMySecret";
 
 // Connect to data base
 const connectDB = async () => {
@@ -28,6 +30,8 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String,
 });
+
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
 
 const User = new mongoose.model("User", userSchema);
 
